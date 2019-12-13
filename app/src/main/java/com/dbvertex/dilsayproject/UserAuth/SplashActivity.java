@@ -19,6 +19,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.dbvertex.dilsayproject.EndPoints;
+import com.dbvertex.dilsayproject.Filter.FilterActivity;
 import com.dbvertex.dilsayproject.MapsActivity;
 import com.dbvertex.dilsayproject.R;
 import com.dbvertex.dilsayproject.session.SessionManager;
@@ -67,7 +68,7 @@ public class SplashActivity extends AppCompatActivity {
                                 public void run() {
                                     if (session.isLoggedIn()) {
 
-                                        startActivity(new Intent(SplashActivity.this, HomePageActivity.class)
+                                        startActivity(new Intent(SplashActivity.this, FilterActivity.class)
                                                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
                                         overridePendingTransition(R.anim.trans_left_in,
                                                 R.anim.trans_left_out);

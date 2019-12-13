@@ -46,7 +46,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -57,8 +56,13 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,6 +70,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -80,7 +85,6 @@ public class MyLocationActivity extends FragmentActivity implements OnMapReadyCa
     Intent intent;
     RequestQueue queue;
     String address="";
-    PlaceAutocompleteFragment places;
     Geocoder geocoder;
     double latitude;
     double longitude;
@@ -92,7 +96,8 @@ public class MyLocationActivity extends FragmentActivity implements OnMapReadyCa
     Button submitBTN;
     ProgressDialog progressDialog;
     SessionManager sessionManager;
-
+    private static final int AUTOCOMPLETE_REQUEST_CODE = 0;
+    List<Place.Field> fields;
     MarkerOptions markerOptions;
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -124,35 +129,32 @@ public class MyLocationActivity extends FragmentActivity implements OnMapReadyCa
         addressTV = findViewById(R.id.address);
         submitBTN = findViewById(R.id.submitBTN);
 
+        // Initialize Places.
+        Places.initialize(getApplicationContext(), "AIzaSyBv7CImI7BPEiyAt9NAY35IXbC_5rk9BJg");
+        // Create a new Places client instance.
+        PlacesClient placesClient = Places.createClient(this);
 
-        places = (PlaceAutocompleteFragment)
-                getFragmentManager().findFragmentById(R.id.autocomplete);
+
+
+
+
+
+        fields = Arrays.asList(Place.Field.ID, Place.Field.NAME);
+
         addressTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((View) findViewById(R.id.place_autocomplete_search_input)).performClick();
 
+                Intent intent = new Autocomplete.IntentBuilder(
+                        AutocompleteActivityMode.FULLSCREEN, fields)
+                        .build(MyLocationActivity.this);
+                startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
             }
         });
 
-        places.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
 
-                address = place.getAddress().toString();
-                addressTV.setText(address);
-                getLatLong(address);
 
-            }
 
-            @Override
-            public void onError(Status status) {
-
-                Log.e("exception",status+"");
-                Toast.makeText(getApplicationContext(), status.toString(), Toast.LENGTH_SHORT).show();
-
-            }
-        });
 
         submitBTN.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -181,7 +183,6 @@ public class MyLocationActivity extends FragmentActivity implements OnMapReadyCa
 
 
     }
-
 
 
     private void submitDetail()
@@ -509,6 +510,7 @@ public class MyLocationActivity extends FragmentActivity implements OnMapReadyCa
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         switch (requestCode) {
             case REQUEST_CHECK_SETTINGS_GPS:
                 switch (resultCode) {
@@ -521,6 +523,22 @@ public class MyLocationActivity extends FragmentActivity implements OnMapReadyCa
                         break;
                 }
                 break;
+
+            case AUTOCOMPLETE_REQUEST_CODE:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        Place place = Autocomplete.getPlaceFromIntent(data);
+                        address = place.getName();
+                        addressTV.setText(address);
+                        getLatLong(address);
+
+                        break;
+                    case AutocompleteActivity.RESULT_ERROR:
+                        Status status = Autocomplete.getStatusFromIntent(data);
+                        break;
+                }
+                break;
+
         }
     }
 

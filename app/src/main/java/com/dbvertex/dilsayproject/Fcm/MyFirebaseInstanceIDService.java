@@ -7,27 +7,29 @@ import android.util.Log;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.dbvertex.dilsayproject.session.SessionManager;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
+import com.google.firebase.messaging.FirebaseMessagingService;
 
-public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
-
+public class MyFirebaseInstanceIDService extends FirebaseMessagingService {
+    SessionManager sessionManager;
     @Override
-    public void onTokenRefresh() {
-        super.onTokenRefresh();
-        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+    public void onNewToken(String s) {
+        super.onNewToken(s);
+        //    String refreshedToken = FirebaseInstanceId.getInstance().getInstanceId ();
 
 
-        Log.e("refreshedToken",refreshedToken);
+        Log.e("refreshedToken",s);
+//
+//        storeRegIdInPref(refreshedToken);
+//
+//        // Notify UI that registration has completed, so the progress indicator can be hidden.
+//        Intent registrationComplete = new Intent(Config.REGISTRATION_COMPLETE);
+//        registrationComplete.putExtra("token", refreshedToken);
+//        LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
 
-        storeRegIdInPref(refreshedToken);
-
-        // Notify UI that registration has completed, so the progress indicator can be hidden.
-        Intent registrationComplete = new Intent(Config.REGISTRATION_COMPLETE);
-        registrationComplete.putExtra("token", refreshedToken);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
-
-        sendRegistrationToServer(refreshedToken);
+        sendRegistrationToServer(s);
 
     }
 

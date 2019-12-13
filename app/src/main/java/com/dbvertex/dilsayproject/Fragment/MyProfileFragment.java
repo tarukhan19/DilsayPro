@@ -84,68 +84,66 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+
 public class MyProfileFragment extends Fragment  implements AuthenticationListener {
 
-    FragmentMyProfileBinding binding;
-    RequestQueue queue;
-    ProgressDialog progressDialog;
-    SessionManager session;
+    private FragmentMyProfileBinding binding;
+    private RequestQueue queue;
+    private ProgressDialog progressDialog;
+    private SessionManager session;
     private ArrayList<String> photoBMList;
     LayoutInflater mInflater;
-    String foodprefrence, smokeprefrence, drinkprefrence;
+    private String foodprefrence, smokeprefrence, drinkprefrence;
 
 
     private String token = null;
     private AppPreferences appPreferences = null;
     private AuthenticationDialog authenticationDialog = null;
-    SessionManager sessionManager;
+    private SessionManager sessionManager;
 
 
-    InterestAdapter adapter;
-    SelectInterestAdp adp;
-    Dialog interestDialog;
-    AlertDialog.Builder interestAlertdialog;
-    View interestView;
-    RecyclerView recyclerView;
-    List<ChooseInterestDTO> chooseInterestDTOList;
-    List<String> interestlistsent,heightarraylist,religionarraylist,communityarraylist,educationarraylist,occupationarraylist,raisedinarraylist;
+    private InterestAdapter adapter;
+    private SelectInterestAdp adp;
+    private Dialog interestDialog;
+    private AlertDialog.Builder interestAlertdialog;
+    private View interestView;
+    private RecyclerView recyclerView;
+    private List<ChooseInterestDTO> chooseInterestDTOList;
+    private List<String> interestlistsent,heightarraylist,religionarraylist,communityarraylist,educationarraylist,occupationarraylist,raisedinarraylist;
 
-    ListView heightLV;
-    AlertDialog heightDialog;
-    AlertDialog.Builder  heightbuilder;
-    ArrayAdapter<String> heightArrayAdapter;
+    private ListView heightLV;
+    private AlertDialog heightDialog;
+    private AlertDialog.Builder  heightbuilder;
+    private ArrayAdapter<String> heightArrayAdapter;
 
-    ListView religionLV;
-    AlertDialog religionDialog;
-    AlertDialog.Builder  religionbuilder;
-    ArrayAdapter<String> religionArrayAdapter;
+    private ListView religionLV;
+    private AlertDialog religionDialog;
+    private AlertDialog.Builder  religionbuilder;
+    private ArrayAdapter<String> religionArrayAdapter;
 
-    ListView communityLV;
-    AlertDialog communityDialog;
-    AlertDialog.Builder  communitybuilder;
-    ArrayAdapter<String> communityArrayAdapter;
+    private ListView communityLV;
+    private AlertDialog communityDialog;
+    private AlertDialog.Builder  communitybuilder;
+    private ArrayAdapter<String> communityArrayAdapter;
 
-    ListView educationLV;
-    AlertDialog educationDialog;
-    AlertDialog.Builder  educationbuilder;
-    ArrayAdapter<String> educationArrayAdapter;
-
-
-    ListView occupationLV;
-    AlertDialog occupationDialog;
-    AlertDialog.Builder  occupationbuilder;
-    ArrayAdapter<String> occupationArrayAdapter;
+    private ListView educationLV;
+    private AlertDialog educationDialog;
+    private AlertDialog.Builder  educationbuilder;
+    private ArrayAdapter<String> educationArrayAdapter;
 
 
-    ListView raisedInLV;
-    AlertDialog raisedDialog;
-    AlertDialog.Builder  raisedbuilder;
-    ArrayAdapter<String> raisedArrayAdapter;
+    private ListView occupationLV;
+    private AlertDialog occupationDialog;
+    private AlertDialog.Builder  occupationbuilder;
+    private ArrayAdapter<String> occupationArrayAdapter;
 
-    String name,age,gender,height,raised_in,dob,education,religion,community,career,description,intrests,looking_for,email,mobileno,countrycode;
+
+    private ListView raisedInLV;
+    private AlertDialog raisedDialog;
+    private AlertDialog.Builder  raisedbuilder;
+    private ArrayAdapter<String> raisedArrayAdapter;
+
+    private String name,age,gender,height,raised_in,dob,education,religion,community,career,description,intrests,looking_for,email,mobileno,countrycode;
 
     public MyProfileFragment() {
         // Required empty public constructor

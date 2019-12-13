@@ -37,7 +37,10 @@ import com.dbvertex.dilsayproject.databinding.ActivitySignupBinding;
 import com.dbvertex.dilsayproject.session.SessionManager;
 import com.facebook.AccessToken;
 import com.facebook.appevents.AppEventsLogger;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,7 +104,14 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 binding.male.setChecked(true);
             }
         }
-
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( SignupActivity.this,
+                new OnSuccessListener<InstanceIdResult>() {
+                    @Override
+                    public void onSuccess(InstanceIdResult instanceIdResult) {
+                        regId = instanceIdResult.getToken();
+                        Log.e("Token",regId);
+                    }
+                });
 
         binding.nameTV.setText(name);
         binding.emailTV.setText(emailid);
@@ -364,7 +374,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 params.put("gender", gender);
                 params.put("country_code", countrycode);
                 params.put("device_type", "android");
-                params.put("device_id", displayFirebaseRegId());
+                params.put("device_id", regId);
                 Log.e("params", params.toString());
                 return params;
             }
@@ -375,16 +385,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         queue.add(postRequest);
     }
 
-    private String displayFirebaseRegId() {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences(Config.SHARED_PREF, 0);
-        regId = pref.getString("regId", null);
-        try {
-            Log.e("regId", "" + regId);
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-        return regId;
-    }
+
     @Override
     public void onStart() {
         super.onStart();

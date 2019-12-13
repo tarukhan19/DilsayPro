@@ -42,7 +42,10 @@ import com.facebook.GraphResponse;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,7 +98,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 // App code
             }
         });
-
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( LoginActivity.this,
+                new OnSuccessListener<InstanceIdResult>() {
+                    @Override
+                    public void onSuccess(InstanceIdResult instanceIdResult) {
+                        regId = instanceIdResult.getToken();
+                        Log.e("Token",regId);
+                    }
+                });
         accessTokenTracker = new AccessTokenTracker() {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
@@ -353,7 +363,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 Map<String, String> params = new HashMap<>();
                 params.put("fb_id", fid);
                 params.put("device_type","android");
-                params.put("device_id", displayFirebaseRegId());
+                params.put("device_id",regId);
                 Log.e("params", params.toString());
                 return params;
             }
@@ -363,16 +373,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         postRequest.setRetryPolicy(policy);
         queue.add(postRequest);
     }
-    private String displayFirebaseRegId() {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences(Config.SHARED_PREF, 0);
-        regId = pref.getString("regId", null);
-        try {
-            Log.e("regId", "" + regId);
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-        return regId;
-    }
+
     @Override
     public void onNetworkConnectionChanged(boolean isConnected) {
         this.isConnected=isConnected;
