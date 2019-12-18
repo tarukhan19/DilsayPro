@@ -6,6 +6,7 @@ import androidx.databinding.DataBindingUtil;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,6 +35,7 @@ import com.dbvertex.dilsayproject.EndPoints;
 import com.dbvertex.dilsayproject.HideKeyboard;
 import com.dbvertex.dilsayproject.Model.HeightDTO;
 import com.dbvertex.dilsayproject.R;
+import com.dbvertex.dilsayproject.UserAuth.ReligionActivity;
 import com.dbvertex.dilsayproject.databinding.ActivityFilterBinding;
 import com.dbvertex.dilsayproject.session.SessionManager;
 
@@ -50,11 +52,7 @@ public class FilterActivity extends AppCompatActivity {
     SessionManager sessionManager;
     RequestQueue queue;
     ProgressDialog progressDialog;
-    AlertDialog minHeightDialog,maxHeightdialog;
-    AlertDialog.Builder minHeightBuilder, maxHeightBuilder;
-    ArrayList<String> minHeightArrayList,maxHeightArrayList;
-    ListView minHeightLV,maxHeightLV;
-    ArrayAdapter<String> minHeightadapter,maxHeightadapter;
+
     String minHeight,maxHeight;
 
     @Override
@@ -72,23 +70,7 @@ public class FilterActivity extends AppCompatActivity {
         queue = Volley.newRequestQueue(this);
         sessionManager = new SessionManager(getApplicationContext());
         progressDialog = new ProgressDialog(this);
-        minHeightBuilder = new AlertDialog.Builder(FilterActivity.this);
-        minHeightLV = new ListView(this);
-        minHeightArrayList = new ArrayList<>();
-        minHeightadapter = new ArrayAdapter<String>(this,
-                R.layout.item_spinner, R.id.text, minHeightArrayList);
-        minHeightLV.setAdapter(minHeightadapter);
-        minHeightBuilder.setView(minHeightLV);
-        minHeightDialog = minHeightBuilder.create();
 
-        maxHeightBuilder = new AlertDialog.Builder(FilterActivity.this);
-        maxHeightLV = new ListView(this);
-        maxHeightArrayList = new ArrayList<>();
-        maxHeightadapter = new ArrayAdapter<String>(this,
-                R.layout.item_spinner, R.id.text, maxHeightArrayList);
-        maxHeightLV.setAdapter(maxHeightadapter);
-        maxHeightBuilder.setView(maxHeightLV);
-        maxHeightdialog = maxHeightBuilder.create();
 
         binding.agerangeSeekbar.setOnRangeSeekbarChangeListener(new OnRangeSeekbarChangeListener() {
             @Override
@@ -101,47 +83,25 @@ public class FilterActivity extends AppCompatActivity {
 
 
 
-        binding.minheightLL.setOnClickListener(new View.OnClickListener() {
+
+
+        binding.religionLL.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                minHeightDialog.setView(minHeightLV);
-                minHeightDialog.show();
+                Intent intent = new Intent(FilterActivity.this, ReligionActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("from","filter");
+                startActivity(intent);
+
+                overridePendingTransition(R.anim.trans_left_in,
+                        R.anim.trans_left_out);
             }
         });
 
-        minHeightLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                ViewGroup vg = (ViewGroup) view;
-                TextView txt = (TextView) vg.findViewById(R.id.text);
-                binding.minHeightTV.setText(txt.getText().toString());
-                minHeight = txt.getText().toString();
-                minHeightDialog.dismiss();
-
-            }
-        });
-
-        binding.maxheightLL.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-               // HideKeyboard.hideKeyboard(FilterActivity.this);
-                maxHeightdialog.setView(maxHeightLV);
-                maxHeightdialog.show();
-            }
-        });
-
-        maxHeightLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ViewGroup vg = (ViewGroup) view;
-                TextView txt = (TextView) vg.findViewById(R.id.text);
-                binding.maxHeightTV.setText(txt.getText().toString());
-                maxHeight = txt.getText().toString();
-                maxHeightdialog.dismiss();
-
-            }
-        });
+        if (!sessionManager.getFilterReligion().get(SessionManager.KEY_FILTER_RELIGION_NAME).isEmpty())
+        {
+            binding.reliogionTV.setText(sessionManager.getFilterReligion().get(SessionManager.KEY_FILTER_RELIGION_NAME));
+        }
         loadHeight();
     }
 
@@ -158,8 +118,6 @@ public class FilterActivity extends AppCompatActivity {
                         Log.e("response", response);
                         try {
 
-                            minHeightArrayList.clear();
-                            maxHeightArrayList.clear();
                             progressDialog.dismiss();
                             JSONObject object=new JSONObject(response);
 
@@ -173,8 +131,6 @@ public class FilterActivity extends AppCompatActivity {
                                 for (int i=0;i<dataarray.length();i++)
                                 {
                                     String heightname=dataarray.getString(i);
-                                    minHeightArrayList.add(heightname);
-                                    maxHeightArrayList.add(heightname);
 
                                 }
 

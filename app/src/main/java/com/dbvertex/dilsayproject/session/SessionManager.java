@@ -53,8 +53,18 @@ public class SessionManager {
     public static final String KEY_LONGITUDE = "longitude";
     public static final String KEY_DESCRIPTION="desscription";
     public static final String KEY_DETAILPAGE_USERID = "USRID";
+    public static final String KEY_FILTER_RELIGION_NAME="religionname";
 
+    public void setFilterReligion(String filterReligion) {
+        editor.putString(KEY_FILTER_RELIGION_NAME, filterReligion);
+        editor.commit();
+    }
 
+    public HashMap<String, String> getFilterReligion() {
+        HashMap<String, String> user = new HashMap<>();
+        user.put(KEY_FILTER_RELIGION_NAME, pref.getString(KEY_FILTER_RELIGION_NAME, ""));
+        return user;
+    }
 
 
 

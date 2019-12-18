@@ -51,6 +51,8 @@ public class ReligionActivity extends AppCompatActivity  implements
     RequestQueue queue;
     SessionManager sessionManager;
     boolean isConnected;
+    Intent intent;
+    String from="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +69,11 @@ public class ReligionActivity extends AppCompatActivity  implements
         queue = Volley.newRequestQueue(ReligionActivity.this);
         sessionManager = new SessionManager(this);
 
-
+        intent=getIntent();
+        if (intent.hasExtra("from"))
+        {
+            from=intent.getStringExtra("from");
+        }
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -84,11 +90,13 @@ public class ReligionActivity extends AppCompatActivity  implements
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         nextLL=findViewById(R.id.nextLL);
         religionDTOList = new ArrayList<>();
-        adapter = new ReligionAdapter(this, religionDTOList,nextLL);
+        adapter = new ReligionAdapter(this, religionDTOList,nextLL,from);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(adapter);
+
+        Log.e("from",from);
 
 //        nextLL.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -129,35 +137,43 @@ public class ReligionActivity extends AppCompatActivity  implements
                                 JSONObject data= object.getJSONObject("data");
                                 JSONArray dataarray=data.getJSONArray("religion");
                                 String religion_saved= data.getString("religion_saved");
-                                if (religion_saved.isEmpty())
+                                if (!from.equalsIgnoreCase("filter"))
                                 {
-                                    String religionsaved= dataarray.getString(0);
-                                    sessionManager.setReligion(religionsaved);
 
-                                }
-                                else
-                                {
-                                    sessionManager.setReligion(religion_saved);
+                                    if (religion_saved.isEmpty())
+                                    {
+                                        String religionsaved= dataarray.getString(0);
+                                        sessionManager.setReligion(religionsaved);
 
+                                    }
+                                    else
+                                    {
+                                        sessionManager.setReligion(religion_saved);
+
+                                    }
                                 }
+
+
                                 for (int i=0;i<dataarray.length();i++)
                                 {
                                     String religionname=dataarray.getString(i);
-
                                     ReligionDTO religionDTO=new ReligionDTO();
                                     religionDTO.setRelegionName(religionname);
-
-                                    if (!sessionManager.getReligion().get(SessionManager.KEY_RELIGION).isEmpty())
+                                    if (!from.equalsIgnoreCase("filter"))
                                     {
-                                        if (sessionManager.getReligion().get(SessionManager.KEY_RELIGION)
-                                                .equalsIgnoreCase(religionname))
+                                        if (!sessionManager.getReligion().get(SessionManager.KEY_RELIGION).isEmpty())
                                         {
-                                            religionDTO.setSelected(true);
-                                            adapter.selection=i;
+
+                                            if (sessionManager.getReligion().get(SessionManager.KEY_RELIGION)
+                                                    .equalsIgnoreCase(religionname))
+                                            {
+                                                religionDTO.setSelected(true);
+                                                adapter.selection=i;
+                                            }
+
                                         }
 
                                     }
-
 
                                     religionDTOList.add(religionDTO);
 
