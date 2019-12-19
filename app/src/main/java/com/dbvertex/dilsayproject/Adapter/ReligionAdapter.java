@@ -35,17 +35,16 @@ public class ReligionAdapter extends RecyclerView.Adapter<ReligionAdapter.ViewHo
     SessionManager sessionManager;
     Activity activity;
     LinearLayout nextLL;
-    ArrayList<String> filterReligionNamelist;
+    List<String> sentfilterReleigionList;
     String filterReligionName;
     String from;
-    public ReligionAdapter(Context mcontex, List<ReligionDTO> religionDTOList, LinearLayout nextLL, String from) {
+    public ReligionAdapter(Context mcontex, List<ReligionDTO> religionDTOList, LinearLayout nextLL, String from, List<String> sentfilterReleigionList) {
         this.mcontex = mcontex;
         this.religionDTOList = religionDTOList;
         sessionManager = new SessionManager(mcontex);
         activity= (Activity) mcontex;
         this.nextLL=nextLL;
-        filterReligionNamelist=new ArrayList<>();
-
+        this.sentfilterReleigionList=sentfilterReleigionList;
         this.from=from;
 
     }
@@ -67,26 +66,40 @@ public class ReligionAdapter extends RecyclerView.Adapter<ReligionAdapter.ViewHo
         {
             final ReligionDTO mdata = religionDTOList.get(position);
 
-            holder.communityText.setText(religionDTOList.get(position).getRelegionName());
-            holder.linearlayout.setBackgroundColor(religionDTOList.get(position).isSelected() ? Color.LTGRAY : Color.TRANSPARENT);
-//            holder.bindDataWithViewHolder(religionDTOList.get(position), position);
-
+            holder.communityText.setText(mdata.getRelegionName());
+            if (mdata.isSelected())
+            {
+                holder.checked.setVisibility(View.VISIBLE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
+            } else
+            {
+                holder.checked.setVisibility(View.GONE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
+            }
+            Log.e("isselected",mdata.isSelected()+"");
             holder.linearlayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
 
                         mdata.setSelected(!mdata.isSelected());
-                        holder.linearlayout.setBackgroundColor(mdata.isSelected() ? Color.LTGRAY : Color.TRANSPARENT);
-
-                        if (mdata.isSelected()==true) {
-                            filterReligionNamelist.add(mdata.getRelegionName());
+                    if (mdata.isSelected())
+                    {
+                        holder.checked.setVisibility(View.VISIBLE);
+                        holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
+                    } else
+                    {
+                        holder.checked.setVisibility(View.GONE);
+                        holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
+                    }
+                        if (mdata.isSelected()) {
+                            sentfilterReleigionList.add(mdata.getRelegionName());
 
                         } else {
-                            filterReligionNamelist.remove(mdata.getRelegionName());
+                            sentfilterReleigionList.remove(mdata.getRelegionName());
 
                         }
-                    Log.e("lenslistsentrrayadd"," "+filterReligionNamelist);
+                    Log.e("lenslistsentrrayadd"," "+sentfilterReleigionList);
 
                         notifyDataSetChanged();
 
@@ -136,16 +149,13 @@ public class ReligionAdapter extends RecyclerView.Adapter<ReligionAdapter.ViewHo
             @Override
             public void onClick(View v) {
 
-                if (sessionManager.getReligion().get(SessionManager.KEY_RELIGION).isEmpty())
-                {
-                    Toast.makeText(mcontex, "Select religion", Toast.LENGTH_SHORT).show();
-                }
-                else  if (from.equalsIgnoreCase("filter"))
+
+                if (from.equalsIgnoreCase("filter"))
                 {
                     StringBuilder sbString = new StringBuilder("");
 
                     //iterate through ArrayList
-                    for (String services : filterReligionNamelist) {
+                    for (String services : sentfilterReleigionList) {
                         sbString.append(services).append(",");
                     }
 
@@ -162,11 +172,19 @@ public class ReligionAdapter extends RecyclerView.Adapter<ReligionAdapter.ViewHo
                 }
                 else
                 {
-                    Intent intent = new Intent(mcontex, LifestyleActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    activity.startActivity(intent);
-                    activity.overridePendingTransition(R.anim.trans_left_in,
-                            R.anim.trans_left_out);
+                    if (sessionManager.getReligion().get(SessionManager.KEY_RELIGION).isEmpty())
+                    {
+                        Toast.makeText(mcontex, "Select religion", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        Intent intent = new Intent(mcontex, LifestyleActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        activity.startActivity(intent);
+                        activity.overridePendingTransition(R.anim.trans_left_in,
+                                R.anim.trans_left_out);
+                    }
+
 
                 }
 

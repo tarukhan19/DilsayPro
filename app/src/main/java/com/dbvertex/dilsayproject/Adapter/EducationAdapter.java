@@ -29,7 +29,7 @@ public class EducationAdapter extends RecyclerView.Adapter<EducationAdapter.View
     LinearLayout nextLL;
     public  int selection;
 
-    public EducationAdapter(Context mcontex, List<EducationDTO> educationDTOList, LinearLayout nextLL) {
+    public EducationAdapter(Context mcontex, List<EducationDTO> educationDTOList, LinearLayout nextLL, String from, List<String> sentfilterEducationList) {
         this.mcontex = mcontex;
         this.educationDTOList = educationDTOList;
         sessionManager = new SessionManager(mcontex);

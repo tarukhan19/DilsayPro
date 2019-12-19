@@ -36,6 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,15 +52,31 @@ public class EducationActivity extends AppCompatActivity implements
     SessionManager sessionManager;
     boolean isConnected;
 
+
+    Intent intent;
+    String from="",filterEducation;
+    List<String> filterEducationList,sentfilterEducationList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_education);
 
+
+
         progressDialog = new ProgressDialog(EducationActivity.this, R.style.CustomDialog);
         queue = Volley.newRequestQueue(EducationActivity.this);
         sessionManager = new SessionManager(this);
 
+        intent=getIntent();
+        sentfilterEducationList=new ArrayList<>();
+        if (intent.hasExtra("from"))
+        {
+            from=intent.getStringExtra("from");
+            filterEducation=sessionManager.getFilterCommunity().get(SessionManager.KEY_FILTER_COMMUNITY);
+            filterEducationList = new ArrayList<String>(Arrays.asList(filterEducation.split(",")));
+
+        }
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
@@ -84,7 +101,7 @@ public class EducationActivity extends AppCompatActivity implements
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         nextLL=findViewById(R.id.nextLL);
         educationDTOList = new ArrayList<>();
-        adapter = new EducationAdapter(this, educationDTOList,nextLL);
+        adapter = new EducationAdapter(this, educationDTOList,nextLL,from,sentfilterEducationList);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -125,18 +142,21 @@ public class EducationActivity extends AppCompatActivity implements
                                 JSONObject data= object.getJSONObject("data");
                                 JSONArray dataarray=data.getJSONArray("education");
                                 String education_saved= data.getString("education_saved");
-
-                                if (education_saved.isEmpty())
+                                if (!from.equalsIgnoreCase("filter"))
                                 {
-                                    String educationsaved= dataarray.getString(0);
-                                    sessionManager.setEducation(educationsaved);
+                                    if (education_saved.isEmpty())
+                                    {
+                                        String educationsaved= dataarray.getString(0);
+                                        sessionManager.setEducation(educationsaved);
 
-                                }
-                                else
-                                {
-                                    sessionManager.setEducation(education_saved);
+                                    }
+                                    else
+                                    {
+                                        sessionManager.setEducation(education_saved);
 
+                                    }
                                 }
+
 
                                 for (int i=0;i<dataarray.length();i++)
                                 {
@@ -144,17 +164,35 @@ public class EducationActivity extends AppCompatActivity implements
 
                                     EducationDTO educationDTO=new EducationDTO();
                                     educationDTO.setEducationName(educationname);
-
-                                    if (!sessionManager.getEducation().get(SessionManager.KEY_EDUCATION).isEmpty())
+                                    if (!from.equalsIgnoreCase("filter"))
                                     {
-                                        if (sessionManager.getEducation().get(SessionManager.KEY_EDUCATION)
-                                                .equalsIgnoreCase(educationname))
+                                        if (!sessionManager.getEducation().get(SessionManager.KEY_EDUCATION).isEmpty())
                                         {
-                                            educationDTO.setSelected(true);
-                                            adapter.selection=i;
-                                        }
+                                            if (sessionManager.getEducation().get(SessionManager.KEY_EDUCATION)
+                                                    .equalsIgnoreCase(educationname))
+                                            {
+                                                educationDTO.setSelected(true);
+                                                adapter.selection=i;
+                                            }
 
+                                        }
                                     }
+                                    else
+                                    {
+                                        for (int j=0;j<filterEducationList.size();j++)
+                                        {
+                                            String filterCommunity = filterEducationList.get(j);
+
+                                            if (filterCommunity.equalsIgnoreCase(educationname))
+                                            {
+                                                educationDTO.setSelected(!educationDTO.isSelected());
+                                                sentfilterEducationList.add(filterCommunity);
+
+                                            }
+
+                                        }
+                                    }
+
 
 
                                     educationDTOList.add(educationDTO);

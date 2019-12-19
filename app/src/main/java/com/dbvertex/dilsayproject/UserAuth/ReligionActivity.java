@@ -36,6 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,8 @@ public class ReligionActivity extends AppCompatActivity  implements
     SessionManager sessionManager;
     boolean isConnected;
     Intent intent;
-    String from="";
+    String from="",filterReleigion;
+    List<String> filterReleigionList,sentfilterReleigionList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,13 +70,21 @@ public class ReligionActivity extends AppCompatActivity  implements
         progressDialog = new ProgressDialog(ReligionActivity.this, R.style.CustomDialog);
         queue = Volley.newRequestQueue(ReligionActivity.this);
         sessionManager = new SessionManager(this);
-
         intent=getIntent();
+
+        sentfilterReleigionList=new ArrayList<>();
         if (intent.hasExtra("from"))
         {
             from=intent.getStringExtra("from");
+            filterReleigion=sessionManager.getFilterReligion().get(SessionManager.KEY_FILTER_RELIGION_NAME);
+            filterReleigionList = new ArrayList<String>(Arrays.asList(filterReleigion.split(",")));
+
+            Log.e("filterReleigionList",filterReleigionList+"");
+
+
         }
-        back.setOnClickListener(new View.OnClickListener() {
+        back.setOnClickListener(new View.OnClickListener()
+        {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ReligionActivity.this, RaisedInActivity.class);
@@ -90,25 +100,12 @@ public class ReligionActivity extends AppCompatActivity  implements
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         nextLL=findViewById(R.id.nextLL);
         religionDTOList = new ArrayList<>();
-        adapter = new ReligionAdapter(this, religionDTOList,nextLL,from);
+        adapter = new ReligionAdapter(this, religionDTOList,nextLL,from,sentfilterReleigionList);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(adapter);
 
-        Log.e("from",from);
-
-//        nextLL.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(ReligionActivity.this, ChooseInterestActivity.class);
-//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                startActivity(intent);
-//
-//                overridePendingTransition(R.anim.trans_left_in,
-//                        R.anim.trans_left_out);
-//            }
-//        });
 
     }
 
@@ -139,12 +136,10 @@ public class ReligionActivity extends AppCompatActivity  implements
                                 String religion_saved= data.getString("religion_saved");
                                 if (!from.equalsIgnoreCase("filter"))
                                 {
-
                                     if (religion_saved.isEmpty())
                                     {
                                         String religionsaved= dataarray.getString(0);
                                         sessionManager.setReligion(religionsaved);
-
                                     }
                                     else
                                     {
@@ -173,8 +168,23 @@ public class ReligionActivity extends AppCompatActivity  implements
 
                                         }
 
-                                    }
 
+                                    }
+                                    else
+                                    {
+                                        for (int j=0;j<filterReleigionList.size();j++)
+                                        {
+                                            String filterreligion = filterReleigionList.get(j);
+
+                                            if (filterreligion.equalsIgnoreCase(religionname))
+                                            {
+                                                religionDTO.setSelected(!religionDTO.isSelected());
+                                                sentfilterReleigionList.add(filterreligion);
+
+                                            }
+
+                                        }
+                                    }
                                     religionDTOList.add(religionDTO);
 
                                 }

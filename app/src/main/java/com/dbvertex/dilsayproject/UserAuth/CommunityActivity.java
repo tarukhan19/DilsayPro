@@ -36,6 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,11 @@ public class CommunityActivity extends AppCompatActivity implements
     SessionManager sessionManager;
     boolean isConnected;
 
+    Intent intent;
+    String from="",filterCommunity;
+    List<String> filterCommunityList,sentfilterCommunityList;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,8 +65,18 @@ public class CommunityActivity extends AppCompatActivity implements
         progressDialog = new ProgressDialog(CommunityActivity.this, R.style.CustomDialog);
         queue = Volley.newRequestQueue(CommunityActivity.this);
         sessionManager = new SessionManager(this);
+        intent=getIntent();
+        sentfilterCommunityList=new ArrayList<>();
+        if (intent.hasExtra("from"))
+        {
+            from=intent.getStringExtra("from");
+            filterCommunity=sessionManager.getFilterCommunity().get(SessionManager.KEY_FILTER_COMMUNITY);
+            filterCommunityList = new ArrayList<String>(Arrays.asList(filterCommunity.split(",")));
+
+            Log.e("filterReleigionList",filterCommunityList+"");
 
 
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
         LinearLayout back = toolbar.findViewById(R.id.back_LL);
         TextView toolbar_title = toolbar.findViewById(R.id.titleTV);
@@ -82,7 +98,7 @@ public class CommunityActivity extends AppCompatActivity implements
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         nextLL=findViewById(R.id.nextLL);
         communityDTOList = new ArrayList<>();
-        adapter = new CommunityAdapter(this, communityDTOList,nextLL);
+        adapter = new CommunityAdapter(this, communityDTOList,nextLL,from,sentfilterCommunityList);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -116,35 +132,54 @@ public class CommunityActivity extends AppCompatActivity implements
                                 JSONArray dataarray=data.getJSONArray("community");
                                 String savedcommunity= data.getString("community_saved");
 
-                                if (savedcommunity.isEmpty())
+                                if (!from.equalsIgnoreCase("filter"))
                                 {
-                                    String community_saved= dataarray.getString(0);
-                                    sessionManager.setCommunity(community_saved);
+                                    if (savedcommunity.isEmpty())
+                                    {
+                                        String community_saved= dataarray.getString(0);
+                                        sessionManager.setCommunity(community_saved);
 
-                                }
-                                else
-                                {
-                                    sessionManager.setCommunity(savedcommunity);
+                                    }
+                                    else
+                                    {
+                                        sessionManager.setCommunity(savedcommunity);
 
+                                    }
                                 }
+
 
                                 for (int i=0;i<dataarray.length();i++)
                                 {
                                     String communityname=dataarray.getString(i);
-                                   // String communityid= obj.getString("id");
                                     CommunityDTO communityDTO=new CommunityDTO();
-                                 //   communityDTO.setCommunityId(communityid);
                                     communityDTO.setCommunityName(communityname);
-
-                                    if (!sessionManager.getCommunity().get(SessionManager.KEY_COMMUNITY).isEmpty())
+                                    if (!from.equalsIgnoreCase("filter"))
                                     {
-                                        if (sessionManager.getCommunity().get(SessionManager.KEY_COMMUNITY)
-                                                .equalsIgnoreCase(communityname))
+                                        if (!sessionManager.getCommunity().get(SessionManager.KEY_COMMUNITY).isEmpty())
                                         {
-                                            communityDTO.setSelected(true);
-                                            adapter.selection=i;
+                                            if (sessionManager.getCommunity().get(SessionManager.KEY_COMMUNITY)
+                                                    .equalsIgnoreCase(communityname))
+                                            {
+                                                communityDTO.setSelected(true);
+                                                adapter.selection=i;
+                                            }
+
                                         }
 
+                                    }else
+                                    {
+                                        for (int j=0;j<filterCommunityList.size();j++)
+                                        {
+                                            String filterCommunity = filterCommunityList.get(j);
+
+                                            if (filterCommunity.equalsIgnoreCase(communityname))
+                                            {
+                                                communityDTO.setSelected(!communityDTO.isSelected());
+                                                sentfilterCommunityList.add(filterCommunity);
+
+                                            }
+
+                                        }
                                     }
 
                                     communityDTOList.add(communityDTO);

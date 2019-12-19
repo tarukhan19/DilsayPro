@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +13,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dbvertex.dilsayproject.Filter.FilterActivity;
 import com.dbvertex.dilsayproject.Model.CommunityDTO;
 import com.dbvertex.dilsayproject.R;
 import com.dbvertex.dilsayproject.UserAuth.CarrerActivity;
 import com.dbvertex.dilsayproject.UserAuth.CommunityActivity;
+import com.dbvertex.dilsayproject.UserAuth.LifestyleActivity;
 import com.dbvertex.dilsayproject.session.SessionManager;
 
 import java.util.List;
@@ -26,16 +29,21 @@ import androidx.recyclerview.widget.RecyclerView;
 public class CommunityAdapter extends RecyclerView.Adapter<CommunityAdapter.ViewHolderPollAdapter> {
     private Context mcontex;
     private List<CommunityDTO> communityDTOList;
-//    public int mSelectedItemPosition = -1;
     SessionManager sessionManager;
     Activity activity;
     LinearLayout nextLL;
     public  int selection;
-
-    public CommunityAdapter(Context mcontex, List<CommunityDTO> communityDTOList, LinearLayout nextLL) {
+    List<String> sentfilterCommunityList;
+    String filterCommunityName;
+    String from;
+    public CommunityAdapter(Context mcontex, List<CommunityDTO> communityDTOList, LinearLayout nextLL,
+                            String from, List<String> sentfilterCommunityList)
+    {
         this.mcontex = mcontex;
         this.communityDTOList = communityDTOList;
         this.nextLL = nextLL;
+        this.sentfilterCommunityList=sentfilterCommunityList;
+        this.from=from;
     }
 
     @NonNull
@@ -52,20 +60,69 @@ public class CommunityAdapter extends RecyclerView.Adapter<CommunityAdapter.View
     @Override
     public void onBindViewHolder(@NonNull final ViewHolderPollAdapter holder, final int position)
     {
-
-        holder.communityText.setText(communityDTOList.get(position).getCommunityName());
-
-        if (position==selection)
+        if (from.equalsIgnoreCase("filter"))
         {
-            holder.checked.setVisibility(View.VISIBLE);
-            holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
-        } else
-        {
-            holder.checked.setVisibility(View.GONE);
-            holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
+            final CommunityDTO mdata = communityDTOList.get(position);
+
+            holder.communityText.setText(mdata.getCommunityName());
+            if (mdata.isSelected())
+            {
+                holder.checked.setVisibility(View.VISIBLE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
+            } else
+            {
+                holder.checked.setVisibility(View.GONE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
+            }
+            Log.e("isselected",mdata.isSelected()+"");
+            holder.linearlayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+
+                    mdata.setSelected(!mdata.isSelected());
+                    if (mdata.isSelected())
+                    {
+                        holder.checked.setVisibility(View.VISIBLE);
+                        holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
+                    } else
+                    {
+                        holder.checked.setVisibility(View.GONE);
+                        holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
+                    }
+                    if (mdata.isSelected()) {
+                        sentfilterCommunityList.add(mdata.getCommunityName());
+
+                    } else {
+                        sentfilterCommunityList.remove(mdata.getCommunityName());
+
+                    }
+                    Log.e("lenslistsentrrayadd"," "+sentfilterCommunityList);
+
+                    notifyDataSetChanged();
+
+
+
+                }
+            });
+
+
         }
+        else
+        {
+            holder.communityText.setText(communityDTOList.get(position).getCommunityName());
 
-        holder.linearlayout.setOnClickListener(new View.OnClickListener() {
+            if (position==selection)
+            {
+                holder.checked.setVisibility(View.VISIBLE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
+            } else
+            {
+                holder.checked.setVisibility(View.GONE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
+            }
+
+            holder.linearlayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     selection = position;
@@ -76,23 +133,58 @@ public class CommunityAdapter extends RecyclerView.Adapter<CommunityAdapter.View
             });
 
 
-        holder.bindDataWithViewHolder(communityDTOList.get(position), position);
+            holder.bindDataWithViewHolder(communityDTOList.get(position), position);
+
+
+        }
 
 
 
         nextLL.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
+                if (from.equalsIgnoreCase("filter"))
+                {
+                    StringBuilder sbString = new StringBuilder("");
 
-                if (sessionManager.getCommunity().get(SessionManager.KEY_COMMUNITY).isEmpty()) {
-                    Toast.makeText(mcontex, "Select community", Toast.LENGTH_SHORT).show();
-                } else {
-                    Intent intent = new Intent(mcontex, CarrerActivity.class);
+                    //iterate through ArrayList
+                    for (String services : sentfilterCommunityList) {
+                        sbString.append(services).append(",");
+                    }
+
+                    filterCommunityName = sbString.toString().trim();
+                    if (filterCommunityName.length() > 0)
+                    {filterCommunityName = filterCommunityName.substring(0, filterCommunityName.length() - 1);}
+                    sessionManager.setFilterCommunity(filterCommunityName);
+
+                    Intent intent = new Intent(mcontex, FilterActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     activity.startActivity(intent);
                     activity.overridePendingTransition(R.anim.trans_left_in,
                             R.anim.trans_left_out);
                 }
+                else
+                {
+                    if (sessionManager.getCommunity().get(SessionManager.KEY_COMMUNITY).isEmpty())
+                    {
+                        Toast.makeText(mcontex, "Select community", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        Intent intent = new Intent(mcontex, LifestyleActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        activity.startActivity(intent);
+                        activity.overridePendingTransition(R.anim.trans_left_in,
+                                R.anim.trans_left_out);
+                    }
+
+
+                }
+
+
+
+
 
             }
         });

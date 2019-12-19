@@ -54,6 +54,10 @@ public class SessionManager {
     public static final String KEY_DESCRIPTION="desscription";
     public static final String KEY_DETAILPAGE_USERID = "USRID";
     public static final String KEY_FILTER_RELIGION_NAME="religionname";
+    public static final String KEY_FILTER_MIN_HEIGHT="minh";
+    public static final String KEY_FILTER_MAX_HEIGHT="maxh";
+    public static final String KEY_FILTER_COMMUNITY="community";
+    public static final String KEY_FILTER_EDUCATION="education";
 
     public void setFilterReligion(String filterReligion) {
         editor.putString(KEY_FILTER_RELIGION_NAME, filterReligion);
@@ -66,6 +70,47 @@ public class SessionManager {
         return user;
     }
 
+    public void setFilterCommunity(String minage) {
+        editor.putString(KEY_FILTER_COMMUNITY, minage);
+        editor.commit();
+    }
+
+    public HashMap<String, String> getFilterCommunity() {
+        HashMap<String, String> user = new HashMap<>();
+        user.put(KEY_FILTER_COMMUNITY, pref.getString(KEY_FILTER_COMMUNITY, ""));
+        return user;
+    }
+
+    public void setFilterEducation(String maxage) {
+        editor.putString(KEY_FILTER_EDUCATION, maxage);
+        editor.commit();
+    }
+
+    public HashMap<String, String> getFilterEducation() {
+        HashMap<String, String> user = new HashMap<>();
+        user.put(KEY_FILTER_EDUCATION, pref.getString(KEY_FILTER_EDUCATION, ""));
+        return user;
+    }
+    public void setFilterMaxHeight(String maxHeight) {
+        editor.putString(KEY_FILTER_MAX_HEIGHT, maxHeight);
+        editor.commit();
+    }
+
+    public HashMap<String, String> getFilterMaxHeight() {
+        HashMap<String, String> user = new HashMap<>();
+        user.put(KEY_FILTER_MAX_HEIGHT, pref.getString(KEY_FILTER_MAX_HEIGHT, ""));
+        return user;
+    }
+    public void setFilterMinHeight(String minHeight) {
+        editor.putString(KEY_FILTER_MIN_HEIGHT, minHeight);
+        editor.commit();
+    }
+
+    public HashMap<String, String> getFilterMinHeight() {
+        HashMap<String, String> user = new HashMap<>();
+        user.put(KEY_FILTER_MIN_HEIGHT, pref.getString(KEY_FILTER_MIN_HEIGHT, ""));
+        return user;
+    }
 
 
     public SessionManager(Context context) {
