@@ -37,6 +37,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,10 @@ public class CarrerActivity extends AppCompatActivity implements
     SessionManager sessionManager;
     boolean isConnected;
 
+    Intent intent;
+    String from="",filterCareer;
+    List<String> filterCareerList,sentfilterCareerList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +66,16 @@ public class CarrerActivity extends AppCompatActivity implements
         progressDialog = new ProgressDialog(CarrerActivity.this, R.style.CustomDialog);
         queue = Volley.newRequestQueue(CarrerActivity.this);
         sessionManager = new SessionManager(this);
+
+        intent=getIntent();
+        sentfilterCareerList=new ArrayList<>();
+        if (intent.hasExtra("from"))
+        {
+            from=intent.getStringExtra("from");
+            filterCareer=sessionManager.getFilterCareer().get(SessionManager.KEY_FILTER_CAREER);
+            filterCareerList = new ArrayList<String>(Arrays.asList(filterCareer.split(",")));
+
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
         LinearLayout back = toolbar.findViewById(R.id.back_LL);
@@ -87,7 +102,7 @@ public class CarrerActivity extends AppCompatActivity implements
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         nextLL=findViewById(R.id.nextLL);
         careerDTOList = new ArrayList<>();
-        adapter = new CareerAdapter(this, careerDTOList,nextLL);
+        adapter = new CareerAdapter(this, careerDTOList,nextLL,from,sentfilterCareerList);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -148,21 +163,41 @@ public class CarrerActivity extends AppCompatActivity implements
 
                                 for (int i=0;i<dataarray.length();i++)
                                 {
-                                    String communityname=dataarray.getString(i);
+                                    String careername=dataarray.getString(i);
                                     CareerDTO careerDTO=new CareerDTO();
 //                                    careerDTO.setCareerId(communityid);
-                                    careerDTO.setCareerName(communityname);
+                                    careerDTO.setCareerName(careername);
 
-                                    if (!sessionManager.getCareer().get(SessionManager.KEY_CAREER).isEmpty())
+                                    if (!from.equalsIgnoreCase("filter"))
                                     {
-                                        if (sessionManager.getCareer().get(SessionManager.KEY_CAREER)
-                                                .equalsIgnoreCase(communityname))
+                                        if (!sessionManager.getCareer().get(SessionManager.KEY_CAREER).isEmpty())
                                         {
-                                            careerDTO.setSelected(true);
-                                            adapter.selection=i;
+                                            if (sessionManager.getCareer().get(SessionManager.KEY_CAREER)
+                                                    .equalsIgnoreCase(careername))
+                                            {
+                                                careerDTO.setSelected(true);
+                                                adapter.selection=i;
+                                            }
+
                                         }
 
                                     }
+                                    else
+                                    {
+                                        for (int j=0;j<filterCareerList.size();j++)
+                                        {
+                                            String filterCommunity = filterCareerList.get(j);
+
+                                            if (filterCommunity.equalsIgnoreCase(careername))
+                                            {
+                                                careerDTO.setSelected(!careerDTO.isSelected());
+                                                sentfilterCareerList.add(filterCommunity);
+
+                                            }
+
+                                        }
+                                    }
+
 
                                     careerDTOList.add(careerDTO);
 

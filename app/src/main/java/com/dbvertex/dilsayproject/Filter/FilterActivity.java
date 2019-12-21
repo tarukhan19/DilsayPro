@@ -41,8 +41,11 @@ import com.dbvertex.dilsayproject.EndPoints;
 import com.dbvertex.dilsayproject.HideKeyboard;
 import com.dbvertex.dilsayproject.Model.HeightDTO;
 import com.dbvertex.dilsayproject.R;
+import com.dbvertex.dilsayproject.UserAuth.CarrerActivity;
 import com.dbvertex.dilsayproject.UserAuth.CommunityActivity;
 import com.dbvertex.dilsayproject.UserAuth.EducationActivity;
+import com.dbvertex.dilsayproject.UserAuth.LookingForActivity;
+import com.dbvertex.dilsayproject.UserAuth.RaisedInActivity;
 import com.dbvertex.dilsayproject.UserAuth.ReligionActivity;
 import com.dbvertex.dilsayproject.databinding.ActivityFilterBinding;
 import com.dbvertex.dilsayproject.session.SessionManager;
@@ -174,6 +177,45 @@ public class FilterActivity extends AppCompatActivity {
             }
         });
 
+        binding.careerLL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(FilterActivity.this, CarrerActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("from", "filter");
+                startActivity(intent);
+
+                overridePendingTransition(R.anim.trans_left_in,
+                        R.anim.trans_left_out);
+            }
+        });
+
+        binding.raisedinLL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(FilterActivity.this, RaisedInActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("from", "filter");
+                startActivity(intent);
+
+                overridePendingTransition(R.anim.trans_left_in,
+                        R.anim.trans_left_out);
+            }
+        });
+
+        binding.genderLL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(FilterActivity.this, LookingForActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("from", "filter");
+                startActivity(intent);
+
+                overridePendingTransition(R.anim.trans_left_in,
+                        R.anim.trans_left_out);
+            }
+        });
+
         if (!sessionManager.getFilterReligion().get(SessionManager.KEY_FILTER_RELIGION_NAME).isEmpty()) {
             binding.reliogionTV.setText(sessionManager.getFilterReligion().get(SessionManager.KEY_FILTER_RELIGION_NAME));
         }
@@ -191,7 +233,25 @@ public class FilterActivity extends AppCompatActivity {
         {
             binding.educationTV.setText(sessionManager.getFilterEducation().get(SessionManager.KEY_FILTER_EDUCATION));
         }
-
+        if (!sessionManager.getFilterCareer().get(SessionManager.KEY_FILTER_CAREER).isEmpty())
+        {
+            binding.careerTV.setText(sessionManager.getFilterCareer().get(SessionManager.KEY_FILTER_CAREER));
+        }
+        if (!sessionManager.getFilterRaisedIn().get(SessionManager.KEY_FILTER_RAISEDIN).isEmpty())
+        {
+            binding.raisedinTV.setText(sessionManager.getFilterRaisedIn().get(SessionManager.KEY_FILTER_RAISEDIN));
+        }
+        if (!sessionManager.getFilterLookingFor().get(SessionManager.KEY_FILTER_LOOKINGFOR).isEmpty())
+        {
+            if (sessionManager.getFilterLookingFor().get(SessionManager.KEY_FILTER_LOOKINGFOR).equalsIgnoreCase("F"))
+            {
+                binding.genderTV.setText("Female");
+            }
+            else
+            {
+                binding.genderTV.setText("Male");
+            }
+        }
         loadHeight();
     }
 

@@ -37,13 +37,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class RaisedInActivity extends AppCompatActivity implements
-        ConnectivityReceiver.ConnectivityReceiverListener{
-
+        ConnectivityReceiver.ConnectivityReceiverListener
+    {
     private RecyclerView recyclerView;
     private RaisedInAdapter adapter;
     private List<RaisedInDTO> raisedInDTOList;
@@ -52,7 +53,9 @@ public class RaisedInActivity extends AppCompatActivity implements
     RequestQueue queue;
     SessionManager sessionManager;
     boolean isConnected;
-
+    Intent intent;
+    String from="",filterRaisedIn;
+    List<String> filterRaisedInList,sentfilterRaisedInList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +64,16 @@ public class RaisedInActivity extends AppCompatActivity implements
         progressDialog = new ProgressDialog(RaisedInActivity.this, R.style.CustomDialog);
         queue = Volley.newRequestQueue(RaisedInActivity.this);
         sessionManager = new SessionManager(this);
+        intent=getIntent();
 
+        sentfilterRaisedInList=new ArrayList<>();
+        if (intent.hasExtra("from"))
+        {
+            from=intent.getStringExtra("from");
+            filterRaisedIn=sessionManager.getFilterRaisedIn().get(SessionManager.KEY_FILTER_RAISEDIN);
+            filterRaisedInList = new ArrayList<String>(Arrays.asList(filterRaisedIn.split(",")));
+
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
         LinearLayout back = toolbar.findViewById(R.id.back_LL);
         TextView toolbar_title = toolbar.findViewById(R.id.titleTV);
@@ -82,7 +94,7 @@ public class RaisedInActivity extends AppCompatActivity implements
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         nextLL=findViewById(R.id.nextLL);
         raisedInDTOList = new ArrayList<>();
-        adapter = new RaisedInAdapter(this, raisedInDTOList,nextLL);
+        adapter = new RaisedInAdapter(this, raisedInDTOList,nextLL,from,sentfilterRaisedInList);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -107,7 +119,6 @@ public class RaisedInActivity extends AppCompatActivity implements
 
     private void loadRaised()
     {
-
         progressDialog.setMessage("Please Wait..");
         progressDialog.setCancelable(true);
         progressDialog.show();
@@ -129,17 +140,21 @@ public class RaisedInActivity extends AppCompatActivity implements
                                 JSONObject data= object.getJSONObject("data");
                                 JSONArray dataarray=data.getJSONArray("raised_in");
                                 String raised_in_saved= data.getString("raised_in_saved");
-                                if (raised_in_saved.isEmpty())
+                                if (!from.equalsIgnoreCase("filter"))
                                 {
-                                    String raisedinsaved= dataarray.getString(0);
-                                    sessionManager.setRaisedIn(raisedinsaved);
+                                    if (raised_in_saved.isEmpty())
+                                    {
+                                        String raisedinsaved= dataarray.getString(0);
+                                        sessionManager.setRaisedIn(raisedinsaved);
 
-                                }
-                                else
-                                {
-                                    sessionManager.setRaisedIn(raised_in_saved);
+                                    }
+                                    else
+                                    {
+                                        sessionManager.setRaisedIn(raised_in_saved);
 
+                                    }
                                 }
+
                                 for (int i=0;i<dataarray.length();i++)
                                 {
                                     String raisedinname=dataarray.getString(i);
@@ -147,19 +162,37 @@ public class RaisedInActivity extends AppCompatActivity implements
                                     RaisedInDTO raisedInDTO=new RaisedInDTO();
                                   //  raisedInDTO.setRaisedInId(raisedinid);
                                     raisedInDTO.setRaisedInName(raisedinname);
-
-
-                                    if (!sessionManager.getCareer().get(SessionManager.KEY_CAREER).isEmpty())
+                                    if (!from.equalsIgnoreCase("filter"))
                                     {
-                                        if (sessionManager.getRaisedIn().get(SessionManager.KEY_RAISEDIN)
-                                                .equalsIgnoreCase(raisedinname))
+
+                                        if (!sessionManager.getRaisedIn().get(SessionManager.KEY_RAISEDIN).isEmpty())
                                         {
-                                            raisedInDTO.setSelected(true);
-                                            adapter.selection=i;
+                                            if (sessionManager.getRaisedIn().get(SessionManager.KEY_RAISEDIN)
+                                                    .equalsIgnoreCase(raisedinname))
+                                            {
+                                                raisedInDTO.setSelected(true);
+                                                adapter.selection=i;
+                                            }
+
                                         }
 
-                                    }
 
+                                    }
+                                    else
+                                    {
+                                        for (int j=0;j<filterRaisedInList.size();j++)
+                                        {
+                                            String filterreligion = filterRaisedInList.get(j);
+
+                                            if (filterreligion.equalsIgnoreCase(raisedinname))
+                                            {
+                                                raisedInDTO.setSelected(!raisedInDTO.isSelected());
+                                                sentfilterRaisedInList.add(filterreligion);
+
+                                            }
+
+                                        }
+                                    }
 
                                     raisedInDTOList.add(raisedInDTO);
 

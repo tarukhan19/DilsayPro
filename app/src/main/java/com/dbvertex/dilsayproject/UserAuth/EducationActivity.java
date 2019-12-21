@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 public class EducationActivity extends AppCompatActivity implements
-        ConnectivityReceiver.ConnectivityReceiverListener{
+    ConnectivityReceiver.ConnectivityReceiverListener{
     private RecyclerView recyclerView;
     private EducationAdapter adapter;
     private List<EducationDTO> educationDTOList;
@@ -51,8 +51,6 @@ public class EducationActivity extends AppCompatActivity implements
     RequestQueue queue;
     SessionManager sessionManager;
     boolean isConnected;
-
-
     Intent intent;
     String from="",filterEducation;
     List<String> filterEducationList,sentfilterEducationList;

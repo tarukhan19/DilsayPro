@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dbvertex.dilsayproject.Filter.FilterActivity;
 import com.dbvertex.dilsayproject.Model.CareerDTO;
 import com.dbvertex.dilsayproject.R;
 import com.dbvertex.dilsayproject.UserAuth.EducationActivity;
@@ -30,11 +31,15 @@ public class CareerAdapter extends RecyclerView.Adapter<CareerAdapter.ViewHolder
     SessionManager sessionManager;
     LinearLayout nextLL;
     public  int selection;
-
-    public CareerAdapter(Context mcontex, List<CareerDTO> careerDTOList, LinearLayout nextLL) {
+    List<String> sentfilterCareerList;
+    String filterCareerName;
+    String from;
+    public CareerAdapter(Context mcontex, List<CareerDTO> careerDTOList, LinearLayout nextLL, String from, List<String> sentfilterCareerList) {
         this.mcontex = mcontex;
         this.careerDTOList = careerDTOList;
         this.nextLL = nextLL;
+        this.sentfilterCareerList=sentfilterCareerList;
+        this.from=from;
     }
 
     @NonNull
@@ -51,51 +56,125 @@ public class CareerAdapter extends RecyclerView.Adapter<CareerAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull final ViewHolderPollAdapter holder, final int position)
     {
-
-
-        holder.communityText.setText(careerDTOList.get(position).getCareerName());
-
-        if (position==selection)
+        if (from.equalsIgnoreCase("filter"))
         {
-            holder.checked.setVisibility(View.VISIBLE);
-            holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
-        } else
-        {
-            holder.checked.setVisibility(View.GONE);
-            holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
+            final CareerDTO mdata = careerDTOList.get(position);
+
+            holder.communityText.setText(mdata.getCareerName());
+            if (mdata.isSelected())
+            {
+                holder.checked.setVisibility(View.VISIBLE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
+            } else
+            {
+                holder.checked.setVisibility(View.GONE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
+            }
+            Log.e("isselected",mdata.isSelected()+"");
+            holder.linearlayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+
+                    mdata.setSelected(!mdata.isSelected());
+                    if (mdata.isSelected())
+                    {
+                        holder.checked.setVisibility(View.VISIBLE);
+                        holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
+                    } else
+                    {
+                        holder.checked.setVisibility(View.GONE);
+                        holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
+                    }
+                    if (mdata.isSelected()) {
+                        sentfilterCareerList.add(mdata.getCareerName());
+
+                    } else {
+                        sentfilterCareerList.remove(mdata.getCareerName());
+
+                    }
+                    Log.e("lenslistsentrrayadd"," "+sentfilterCareerList);
+
+                    notifyDataSetChanged();
+
+
+
+                }
+            });
+
+
         }
 
-        holder.linearlayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                selection = position;
-                notifyDataSetChanged();
-                sessionManager.setCareer(careerDTOList.get(position).getCareerName());
+        else {
 
+            holder.communityText.setText(careerDTOList.get(position).getCareerName());
+
+            if (position == selection) {
+                holder.checked.setVisibility(View.VISIBLE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
+            } else {
+                holder.checked.setVisibility(View.GONE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
             }
-        });
+
+            holder.linearlayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    selection = position;
+                    notifyDataSetChanged();
+                    sessionManager.setCareer(careerDTOList.get(position).getCareerName());
+
+                }
+            });
 
 
-        holder.bindDataWithViewHolder(careerDTOList.get(position), position);
+            holder.bindDataWithViewHolder(careerDTOList.get(position), position);
 
-
+        }
 
         nextLL.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (from.equalsIgnoreCase("filter"))
+                {
+                    StringBuilder sbString = new StringBuilder("");
 
-                if (sessionManager.getCareer().get(SessionManager.KEY_CAREER).isEmpty())
-                {
-                    Toast.makeText(mcontex, "Select career", Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    Intent intent = new Intent(mcontex, EducationActivity.class);
+                    //iterate through ArrayList
+                    for (String services : sentfilterCareerList) {
+                        sbString.append(services).append(",");
+                    }
+
+                    filterCareerName = sbString.toString().trim();
+                    if (filterCareerName.length() > 0)
+                    {filterCareerName = filterCareerName.substring(0, filterCareerName.length() - 1);}
+                    sessionManager.setFilterCareer(filterCareerName);
+
+                    Intent intent = new Intent(mcontex, FilterActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     activity.startActivity(intent);
                     activity.overridePendingTransition(R.anim.trans_left_in,
                             R.anim.trans_left_out);
                 }
+                else
+                {
+                    if (sessionManager.getCareer().get(SessionManager.KEY_CAREER).isEmpty())
+                    {
+                        Toast.makeText(mcontex, "Select career", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        Intent intent = new Intent(mcontex, EducationActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        activity.startActivity(intent);
+                        activity.overridePendingTransition(R.anim.trans_left_in,
+                                R.anim.trans_left_out);
+                    }
+
+
+                }
+
+
+
 
             }
         });

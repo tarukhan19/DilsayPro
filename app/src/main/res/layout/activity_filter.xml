@@ -337,6 +337,7 @@
 
                 </LinearLayout>
                 <LinearLayout
+                    android:id="@+id/careerLL"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginLeft="8dp"
@@ -382,6 +383,7 @@
 
                 </LinearLayout>
                 <LinearLayout
+                    android:id="@+id/genderLL"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginLeft="8dp"
@@ -427,6 +429,8 @@
 
                 </LinearLayout>
                 <LinearLayout
+                    android:id="@+id/raisedinLL"
+
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
                     android:layout_marginLeft="8dp"

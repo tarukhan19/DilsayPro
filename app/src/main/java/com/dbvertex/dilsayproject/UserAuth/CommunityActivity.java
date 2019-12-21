@@ -136,6 +136,7 @@ public class CommunityActivity extends AppCompatActivity implements
                                 {
                                     if (savedcommunity.isEmpty())
                                     {
+
                                         String community_saved= dataarray.getString(0);
                                         sessionManager.setCommunity(community_saved);
 

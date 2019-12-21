@@ -22,6 +22,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.dbvertex.dilsayproject.EndPoints;
+import com.dbvertex.dilsayproject.Filter.FilterActivity;
 import com.dbvertex.dilsayproject.Model.CareerDTO;
 import com.dbvertex.dilsayproject.R;
 import com.dbvertex.dilsayproject.databinding.ActivityLookingForBinding;
@@ -31,7 +32,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class LookingForActivity extends AppCompatActivity {
@@ -41,12 +45,49 @@ public class LookingForActivity extends AppCompatActivity {
     String lookingfor = "";
     ProgressDialog progressDialog;
     RequestQueue queue;
+
+    Intent intent;
+    String from="",filterLookingFor="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_looking_for);
         sessionManager = new SessionManager(this);
         progressDialog = new ProgressDialog(LookingForActivity.this, R.style.CustomDialog);
+
+        intent=getIntent();
+        if (intent.hasExtra("from"))
+        {
+            from=intent.getStringExtra("from");
+            filterLookingFor=sessionManager.getFilterLookingFor().get(SessionManager.KEY_FILTER_LOOKINGFOR);
+
+            if (!filterLookingFor.isEmpty())
+            {
+                if (filterLookingFor.equalsIgnoreCase("M"))
+                {
+                    binding.maleLL.setBackground(getResources().getDrawable(R.drawable.solidgradientcircle));
+                    binding.maleIV.setImageDrawable(getResources().getDrawable(R.drawable.malewhite));
+                    binding.femaleLL.setBackground(getResources().getDrawable(R.drawable.solidwhitecircle));
+                    binding.femaleIV.setImageDrawable(getResources().getDrawable(R.drawable.femalecolor));
+                    binding.maleTV.setTextColor(getResources().getColor(R.color.colorPrimary));
+                    binding.femaleTV.setTextColor(getResources().getColor(R.color.grey));
+                }
+                else
+                {
+                    binding.maleLL.setBackground(getResources().getDrawable(R.drawable.solidwhitecircle));
+                    binding.maleIV.setImageDrawable(getResources().getDrawable(R.drawable.malecolor));
+                    binding.femaleLL.setBackground(getResources().getDrawable(R.drawable.solidgradientcircle));
+                    binding.femaleIV.setImageDrawable(getResources().getDrawable(R.drawable.femalewhite));
+                    binding.maleTV.setTextColor(getResources().getColor(R.color.grey));
+                    binding.femaleTV.setTextColor(getResources().getColor(R.color.colorPrimary));
+                }
+            }
+
+
+            Log.e("filterReleigionList",filterLookingFor+"");
+
+
+        }
 
         queue = Volley.newRequestQueue(LookingForActivity.this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
@@ -79,8 +120,17 @@ public class LookingForActivity extends AppCompatActivity {
                     binding.femaleIV.setImageDrawable(getResources().getDrawable(R.drawable.femalecolor));
                     binding.maleTV.setTextColor(getResources().getColor(R.color.colorPrimary));
                     binding.femaleTV.setTextColor(getResources().getColor(R.color.grey));
-                    lookingfor = "M";
-                    sessionManager.setLookingfor(lookingfor);
+                    if (intent.hasExtra("from"))
+                    {
+
+                        filterLookingFor="M";
+                    }
+                    else
+                    {
+                        lookingfor = "M";
+                        sessionManager.setLookingfor(lookingfor);
+                    }
+
 
                 }
 
@@ -101,8 +151,17 @@ public class LookingForActivity extends AppCompatActivity {
                     binding.maleIV.setImageDrawable(getResources().getDrawable(R.drawable.malecolor));
                     binding.maleTV.setTextColor(getResources().getColor(R.color.grey));
                     binding.femaleTV.setTextColor(getResources().getColor(R.color.colorPrimary));
-                    lookingfor = "F";
-                    sessionManager.setLookingfor(lookingfor);
+                    if (intent.hasExtra("from"))
+                    {
+
+                        filterLookingFor="F";
+                    }
+                    else
+                    {
+                        lookingfor = "F";
+                        sessionManager.setLookingfor(lookingfor);
+                    }
+
                 }
 
 
@@ -115,18 +174,32 @@ public class LookingForActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                if (!sessionManager.getLookingFor().get(SessionManager.KEY_LOOKINGFOR).isEmpty()) {
-                    Intent intent = new Intent(LookingForActivity.this, CommunityActivity.class);
+                if (intent.hasExtra("from"))
+                {
+
+                        sessionManager.setFilterLookingFor(filterLookingFor);
+                    Intent intent = new Intent(LookingForActivity.this, FilterActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     overridePendingTransition(R.anim.trans_left_in,
                             R.anim.trans_left_out);
                 }
-
                 else
                 {
-                    Toast.makeText(LookingForActivity.this, "Select one option", Toast.LENGTH_SHORT).show();
+                    if (!sessionManager.getLookingFor().get(SessionManager.KEY_LOOKINGFOR).isEmpty()) {
+                        Intent intent = new Intent(LookingForActivity.this, CommunityActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        overridePendingTransition(R.anim.trans_left_in,
+                                R.anim.trans_left_out);
+                    }
+
+                    else
+                    {
+                        Toast.makeText(LookingForActivity.this, "Select one option", Toast.LENGTH_SHORT).show();
+                    }
                 }
+
             }
         });
 
@@ -171,33 +244,38 @@ public class LookingForActivity extends AppCompatActivity {
                             if (status.equalsIgnoreCase("200") && message.equalsIgnoreCase("success"))
                             {
                                 JSONObject jsonObject=object.getJSONObject("data");
-                                String looking_for_saved=jsonObject.getString("looking_for_saved");
-                                sessionManager.setLookingfor(looking_for_saved);
-
-                                if (looking_for_saved.equalsIgnoreCase("F"))
+                                if (!intent.hasExtra("from"))
                                 {
-                                    binding.femaleLL.setBackground(getResources().getDrawable(R.drawable.solidgradientcircle));
-                                    binding.femaleIV.setImageDrawable(getResources().getDrawable(R.drawable.femalewhite));
-                                    binding.maleLL.setBackground(getResources().getDrawable(R.drawable.solidwhitecircle));
-                                    binding.maleIV.setImageDrawable(getResources().getDrawable(R.drawable.malecolor));
-                                    binding.maleTV.setTextColor(getResources().getColor(R.color.grey));
-                                    binding.femaleTV.setTextColor(getResources().getColor(R.color.colorPrimary));
+                                    String looking_for_saved=jsonObject.getString("looking_for_saved");
+                                    sessionManager.setLookingfor(looking_for_saved);
+
+                                    if (looking_for_saved.equalsIgnoreCase("F"))
+                                    {
+                                        binding.femaleLL.setBackground(getResources().getDrawable(R.drawable.solidgradientcircle));
+                                        binding.femaleIV.setImageDrawable(getResources().getDrawable(R.drawable.femalewhite));
+                                        binding.maleLL.setBackground(getResources().getDrawable(R.drawable.solidwhitecircle));
+                                        binding.maleIV.setImageDrawable(getResources().getDrawable(R.drawable.malecolor));
+                                        binding.maleTV.setTextColor(getResources().getColor(R.color.grey));
+                                        binding.femaleTV.setTextColor(getResources().getColor(R.color.colorPrimary));
+                                    }
+
+                                    else if (looking_for_saved.equalsIgnoreCase("M"))
+                                    {
+
+                                        binding.maleLL.setBackground(getResources().getDrawable(R.drawable.solidgradientcircle));
+                                        binding.maleIV.setImageDrawable(getResources().getDrawable(R.drawable.malewhite));
+                                        binding.femaleLL.setBackground(getResources().getDrawable(R.drawable.solidwhitecircle));
+                                        binding.femaleIV.setImageDrawable(getResources().getDrawable(R.drawable.femalecolor));
+                                        binding.maleTV.setTextColor(getResources().getColor(R.color.colorPrimary));
+                                        binding.femaleTV.setTextColor(getResources().getColor(R.color.grey));
+
+
+                                    }
+
+
                                 }
 
-                                else if (looking_for_saved.equalsIgnoreCase("M"))
-                                {
-
-                                    binding.maleLL.setBackground(getResources().getDrawable(R.drawable.solidgradientcircle));
-                                    binding.maleIV.setImageDrawable(getResources().getDrawable(R.drawable.malewhite));
-                                    binding.femaleLL.setBackground(getResources().getDrawable(R.drawable.solidwhitecircle));
-                                    binding.femaleIV.setImageDrawable(getResources().getDrawable(R.drawable.femalecolor));
-                                    binding.maleTV.setTextColor(getResources().getColor(R.color.colorPrimary));
-                                    binding.femaleTV.setTextColor(getResources().getColor(R.color.grey));
-
-
-                                }
-
-                            }
+                                                         }
 
 
                         } catch (JSONException e) {

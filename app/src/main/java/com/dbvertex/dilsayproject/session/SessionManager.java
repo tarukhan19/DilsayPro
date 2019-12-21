@@ -58,6 +58,45 @@ public class SessionManager {
     public static final String KEY_FILTER_MAX_HEIGHT="maxh";
     public static final String KEY_FILTER_COMMUNITY="community";
     public static final String KEY_FILTER_EDUCATION="education";
+    public static final String KEY_FILTER_CAREER="career";
+    public static final String KEY_FILTER_RAISEDIN="raisedin";
+    public static final String KEY_FILTER_LOOKINGFOR="lookingfor";
+
+
+    public void setFilterLookingFor(String filterLookingfor) {
+        editor.putString(KEY_FILTER_LOOKINGFOR, filterLookingfor);
+        editor.commit();
+    }
+
+    public HashMap<String, String> getFilterLookingFor() {
+        HashMap<String, String> user = new HashMap<>();
+        user.put(KEY_FILTER_LOOKINGFOR, pref.getString(KEY_FILTER_LOOKINGFOR, ""));
+        return user;
+    }
+
+
+    public void setFilterRaisedIn(String filterRaisedIn) {
+        editor.putString(KEY_FILTER_RAISEDIN, filterRaisedIn);
+        editor.commit();
+    }
+
+    public HashMap<String, String> getFilterRaisedIn() {
+        HashMap<String, String> user = new HashMap<>();
+        user.put(KEY_FILTER_RAISEDIN, pref.getString(KEY_FILTER_RAISEDIN, ""));
+        return user;
+    }
+
+    public void setFilterCareer(String filterCareer) {
+        editor.putString(KEY_FILTER_CAREER, filterCareer);
+        editor.commit();
+    }
+
+    public HashMap<String, String> getFilterCareer() {
+        HashMap<String, String> user = new HashMap<>();
+        user.put(KEY_FILTER_CAREER, pref.getString(KEY_FILTER_CAREER, ""));
+        return user;
+    }
+
 
     public void setFilterReligion(String filterReligion) {
         editor.putString(KEY_FILTER_RELIGION_NAME, filterReligion);

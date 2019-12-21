@@ -3,6 +3,7 @@ package com.dbvertex.dilsayproject.Adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dbvertex.dilsayproject.Filter.FilterActivity;
 import com.dbvertex.dilsayproject.Model.RaisedInDTO;
 import com.dbvertex.dilsayproject.R;
 import com.dbvertex.dilsayproject.UserAuth.RaisedInActivity;
@@ -29,11 +31,17 @@ public class RaisedInAdapter extends RecyclerView.Adapter<RaisedInAdapter.ViewHo
     SessionManager sessionManager;
     Activity activity;
     LinearLayout nextLL;
-    public RaisedInAdapter(Context mcontex, List<RaisedInDTO> raisedInDTOList, LinearLayout nextLL) {
+    String from;
+    String filterRaisedInName;
+
+    List<String> sentfilterRaisedInList;
+    public RaisedInAdapter(Context mcontex, List<RaisedInDTO> raisedInDTOList, LinearLayout nextLL, String from,
+                           List<String> sentfilterRaisedInList) {
         this.mcontex = mcontex;
         this.raisedInDTOList = raisedInDTOList;
         this.nextLL=nextLL;
-
+        this.from=from;
+        this.sentfilterRaisedInList=sentfilterRaisedInList;
     }
 
     @NonNull
@@ -52,47 +60,118 @@ public class RaisedInAdapter extends RecyclerView.Adapter<RaisedInAdapter.ViewHo
 
         // //Log.e("selectAnsId",selectAnsId.size()+"ansIdlist "+ansIdlist.size()+"");
 
-
-        holder.communityText.setText(raisedInDTOList.get(position).getRaisedInName());
-        if (position==selection)
+        if (from.equalsIgnoreCase("filter"))
         {
-            holder.checked.setVisibility(View.VISIBLE);
-            holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
-        } else
-        {
-            holder.checked.setVisibility(View.GONE);
-            holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
-        }
+            final RaisedInDTO mdata = raisedInDTOList.get(position);
 
-        holder.linearlayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                selection = position;
-                notifyDataSetChanged();
-                sessionManager.setRaisedIn(raisedInDTOList.get(position).getRaisedInName());
-
+            holder.communityText.setText(mdata.getRaisedInName());
+            if (mdata.isSelected())
+            {
+                holder.checked.setVisibility(View.VISIBLE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
+            } else
+            {
+                holder.checked.setVisibility(View.GONE);
+                holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
             }
-        });
+            Log.e("isselected",mdata.isSelected()+"");
+            holder.linearlayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
 
-        holder.bindDataWithViewHolder(raisedInDTOList.get(position), position);
+                    mdata.setSelected(!mdata.isSelected());
+                    if (mdata.isSelected())
+                    {
+                        holder.checked.setVisibility(View.VISIBLE);
+                        holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
+                    } else
+                    {
+                        holder.checked.setVisibility(View.GONE);
+                        holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
+                    }
+                    if (mdata.isSelected()) {
+                        sentfilterRaisedInList.add(mdata.getRaisedInName());
 
+                    } else {
+                        sentfilterRaisedInList.remove(mdata.getRaisedInName());
+
+                    }
+                    Log.e("lenslistsentrrayadd"," "+sentfilterRaisedInList);
+
+                    notifyDataSetChanged();
+
+
+
+                }
+            });
+
+
+        }
+        else
+            {
+                holder.communityText.setText(raisedInDTOList.get(position).getRaisedInName());
+                if (position==selection)
+                {
+                    holder.checked.setVisibility(View.VISIBLE);
+                    holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.colorPrimary));
+                } else
+                {
+                    holder.checked.setVisibility(View.GONE);
+                    holder.communityText.setTextColor(mcontex.getResources().getColor(R.color.black));
+                }
+
+                holder.linearlayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        selection = position;
+                        notifyDataSetChanged();
+                        sessionManager.setRaisedIn(raisedInDTOList.get(position).getRaisedInName());
+
+                    }
+                });
+
+                holder.bindDataWithViewHolder(raisedInDTOList.get(position), position);
+            }
 
         nextLL.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (from.equalsIgnoreCase("filter"))
+                {
+                    StringBuilder sbString = new StringBuilder("");
+                    for (String services : sentfilterRaisedInList) {
+                        sbString.append(services).append(",");
+                    }
 
-                if (sessionManager.getRaisedIn().get(SessionManager.KEY_RAISEDIN).isEmpty())
-                {
-                    Toast.makeText(mcontex, "Select an option", Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    Intent intent = new Intent(mcontex, ReligionActivity.class);
+                    filterRaisedInName = sbString.toString().trim();
+                    if (filterRaisedInName.length() > 0)
+                    {filterRaisedInName = filterRaisedInName.substring(0, filterRaisedInName.length() - 1);}
+                    sessionManager.setFilterRaisedIn(filterRaisedInName);
+
+                    Intent intent = new Intent(mcontex, FilterActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     activity.startActivity(intent);
                     activity.overridePendingTransition(R.anim.trans_left_in,
                             R.anim.trans_left_out);
+                }
+                else
+                {
+
+                    if (sessionManager.getRaisedIn().get(SessionManager.KEY_RAISEDIN).isEmpty())
+                    {
+                        Toast.makeText(mcontex, "Select an option", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        Intent intent = new Intent(mcontex, ReligionActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        activity.startActivity(intent);
+                        activity.overridePendingTransition(R.anim.trans_left_in,
+                                R.anim.trans_left_out);
+
+                    }
+
 
                 }
 
@@ -101,7 +180,7 @@ public class RaisedInAdapter extends RecyclerView.Adapter<RaisedInAdapter.ViewHo
             }
         });
 
-        holder.bindDataWithViewHolder(raisedInDTOList.get(position), position);
+
 
 
 
