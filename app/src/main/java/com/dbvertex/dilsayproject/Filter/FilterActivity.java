@@ -73,6 +73,7 @@ public class FilterActivity extends AppCompatActivity {
 
     MinHeightAdapter minHeightAdapter;
     MaxHeightAdapter maxHeightAdapter;
+    String startage,endage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +135,8 @@ public class FilterActivity extends AppCompatActivity {
             {
                 binding.ageMinVal.setText(String.valueOf(minValue));
                 binding.ageMaxVal.setText(String.valueOf(maxValue));
+                startage=String.valueOf(maxValue);
+                endage=String.valueOf(minValue);
             }
         });
 
@@ -268,7 +271,7 @@ public class FilterActivity extends AppCompatActivity {
         progressDialog.setCancelable(true);
         progressDialog.show();
 
-        StringRequest postRequest = new StringRequest(Request.Method.POST, EndPoints.LOADHEIGHT,
+        StringRequest postRequest = new StringRequest(Request.Method.POST, EndPoints.FILTER,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -314,8 +317,15 @@ public class FilterActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put("education", sessionManager.getEducation().get(SessionManager.KEY_EDUCATION));
-                params.put("user_id", sessionManager.getUserId().get(SessionManager.KEY_USERID));
+                params.put("height_start", sessionManager.getFilterMinHeight().get(SessionManager.KEY_FILTER_MIN_HEIGHT));
+                params.put("height_end", sessionManager.getFilterMinHeight().get(SessionManager.KEY_FILTER_MAX_HEIGHT));
+                params.put("start_age", startage);
+                params.put("end_age", endage);
+                params.put("religion", sessionManager.getFilterReligion().get(SessionManager.KEY_FILTER_RELIGION_NAME));
+                params.put("gender", sessionManager.getFilterLookingFor().get(SessionManager.KEY_FILTER_LOOKINGFOR));
+                params.put("raised_in", sessionManager.getFilterRaisedIn().get(SessionManager.KEY_FILTER_RAISEDIN));
+
+                //params.put("user_id", sessionManager.getUserId().get(SessionManager.KEY_USERID));
                 Log.e("params", params.toString());
                 return params;
             }
