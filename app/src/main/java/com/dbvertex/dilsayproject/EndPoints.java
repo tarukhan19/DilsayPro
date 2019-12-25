@@ -63,6 +63,7 @@ public class EndPoints
     //user_id
     public static final String CHAT_LOAD= BASE_URL+"Register/chat_load";
     //sender_id , receiver_id
+    public static final String FILTER= BASE_URL+"Register/chat_load";
 
     public String forProductPost(String urlString, JSONObject params, byte[][] photoArray)
     {

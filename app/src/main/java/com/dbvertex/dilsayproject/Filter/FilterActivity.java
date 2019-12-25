@@ -216,6 +216,13 @@ public class FilterActivity extends AppCompatActivity {
             }
         });
 
+        binding.submitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                submitFilter();
+            }
+        });
+
         if (!sessionManager.getFilterReligion().get(SessionManager.KEY_FILTER_RELIGION_NAME).isEmpty()) {
             binding.reliogionTV.setText(sessionManager.getFilterReligion().get(SessionManager.KEY_FILTER_RELIGION_NAME));
         }
@@ -253,6 +260,70 @@ public class FilterActivity extends AppCompatActivity {
             }
         }
         loadHeight();
+    }
+
+    private void submitFilter()
+    {
+        progressDialog.setMessage("Please Wait..");
+        progressDialog.setCancelable(true);
+        progressDialog.show();
+
+        StringRequest postRequest = new StringRequest(Request.Method.POST, EndPoints.LOADHEIGHT,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.e("response", response);
+                        try {
+
+                            progressDialog.dismiss();
+                            JSONObject object = new JSONObject(response);
+
+                            String status = object.getString("status");
+                            String message = object.getString("message");
+                            if (status.equalsIgnoreCase("200") && message.equalsIgnoreCase("success")) {
+                                JSONObject data = object.getJSONObject("data");
+                                JSONArray dataarray = data.getJSONArray("height");
+
+                                for (int i = 0; i < dataarray.length(); i++) {
+                                    HeightDTO heightDTO=new HeightDTO();
+                                    String heightname = dataarray.getString(i);
+                                    heightDTO.setHeightName(heightname);
+                                    minHeightDTOArrayList.add(heightDTO);
+                                    maxHeightDTOArrayList.add(heightDTO);
+
+                                }
+                                maxHeightAdapter.notifyDataSetChanged();
+                                minHeightAdapter.notifyDataSetChanged();
+
+                            }
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        progressDialog.dismiss();
+                    }
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("education", sessionManager.getEducation().get(SessionManager.KEY_EDUCATION));
+                params.put("user_id", sessionManager.getUserId().get(SessionManager.KEY_USERID));
+                Log.e("params", params.toString());
+                return params;
+            }
+        };
+        int socketTimeout = 30000;
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        postRequest.setRetryPolicy(policy);
+        queue.add(postRequest);
     }
 
     private void loadHeight() {
